@@ -35,8 +35,8 @@ define( 'DS_THEMES_DISABLE_ORIGINAL_MENU', 'TRUE' );
 
 == Screenshots ==
 
-1. Theme table top with paged navigation, tag filter and clickable tag links.
-2. Theme table bottom with Default theme button, paged navigation.
+1. Theme table top with paged navigation and dropdown tag filter.
+2. Theme table bottom with Default theme button, paged navigation, and clickable tag links.
 
 == Notes ==
 
