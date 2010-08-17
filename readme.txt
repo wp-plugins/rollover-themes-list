@@ -10,7 +10,7 @@ An "mu-plugin" to replaces default Appearance->Themes page. Themes list 100 them
 
 == Description ==
 
-If you run a WP3 multisite network with a couple hundred blogs and I have installed a couple hundred themes. The current themes page eats a lot of bandwidth by loading every screen shot on the page, and only shows 15 themes per page. And although most themes have tags, there is no tag filter to search through themes.
+I run a WP3 multisite network with a couple hundred blogs and I have installed a couple hundred themes. The current themes page eats a lot of bandwidth by loading every screen shot on the page, and only shows 15 themes per page. And although most themes have tags, there is no tag filter to search through themes.
 
 So I replaced the default Appearance->Themes page. Themes list in a table a 100 themes per page, but only one screenshot until mouse rollover preview. Themes table filters by clicking tag links or using the dropdown tag filter. Adds a button to set the default theme (as defined by the WP_DEFAULT_THEME constant).
 
