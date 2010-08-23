@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Rollover Themes List
-Plugin URI: http://wordpress.org/extend/plugins/rollover-themes-list/
+Plugin URI: http://dsader.snowotherway.org/wordpress-plugins/rollover-themes-list/
 Description: Replaces default Appearance->Themes page. Themes list 100 themes per page, but only one screenshot until mouse rollover preview. 
 Author: D. Sader
 Version: 3.0.1
