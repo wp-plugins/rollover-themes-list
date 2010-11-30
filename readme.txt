@@ -22,6 +22,7 @@ This section describes how to install the plugin and get it working.
 2. Define constants(optional) near the top of the plugin code:
 `define( 'DS_THEMES_PER_PAGE','100' ); 
 define( 'DS_THEMES_DISABLE_ORIGINAL_MENU', 'TRUE' );
+define( 'DS_THEMES_SHOW_SCREENSHOT_THUMB', 'TRUE' );
 //define( 'WP_DEFAULT_THEME', 'twentyten' );`
 3. Browse your new themes page Appearance->Themes
 
@@ -43,6 +44,10 @@ define( 'DS_THEMES_DISABLE_ORIGINAL_MENU', 'TRUE' );
 * The original mouseover screenshot code and table view comes from the Userthemes Revisted plugin.  I am no longer actively developing Userthemes Revisted.
 
 == Changelog ==
+
+= 3.0.1.2 =
+
+* Added thumb sized screenshots to each row, define( 'DS_THEMES_SHOW_SCREENSHOT_THUMB', 'TRUE' );
 
 = 3.0.1 =
 

@@ -1,10 +1,10 @@
 <?php
 /*
-Plugin Name: Rollover Themes List
-Plugin URI: http://dsader.snowotherway.org/wordpress-plugins/rollover-themes-list/
+Plugin Name: Rollover Themes
+Plugin URI: http://dsader.snowotherway.org
 Description: Replaces default Appearance->Themes page. Themes list 100 themes per page, but only one screenshot until mouse rollover preview. 
-Author: D. Sader
-Version: 3.0.1
+Author: David Sader
+Version: 3.0.1.2
 Author URI: http://dsader.snowotherway.org
 
 This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,9 @@ GNU General Public License for more details.
 */ 
 
 // TODO make Network Options
-define( 'DS_THEMES_PER_PAGE','100' );
-define( 'DS_THEMES_DISABLE_ORIGINAL_MENU', 'TRUE' );// FALSE = keep original Themes menu. Probably should change add_theme_page name below, then. 
+define( 'DS_THEMES_PER_PAGE','100' ); 
+define( 'DS_THEMES_DISABLE_ORIGINAL_MENU', 'TRUE' );
+define( 'DS_THEMES_SHOW_SCREENSHOT_THUMB', 'TRUE' );
 //define( 'WP_DEFAULT_THEME', 'aeros' );
 //------------------------------------------------------------------------//
 //---Hooks----------------------------------------------------------------//
@@ -69,7 +70,7 @@ function ds_unset_themes_submenu() {
 				break;
 				}
 			}
-		}	
+		}
 	$location = add_query_arg( 'page', 'themes_table', 'widgets.php' );
 	if( strpos($_SERVER['REQUEST_URI'], '/themes.php' ) )	wp_redirect($location);	
 	}
@@ -226,12 +227,13 @@ $themes = array_slice( $themes, $start, $per_page );
 <?php } ?>
 <?php 
 	if ( $ct->tags ) : 
-		echo '<p>'. __( 'Tags: | ' );  
+		echo '<p>'. __( 'Tags: ' ); 
+			$action_tags = array(); 
  		foreach ($ct->tags as $tag) {
- 			$tag_link = add_query_arg( 'tag', $tag, $_SERVER['REQUEST_URI'] );
-			echo '<a href="'.$tag_link.'">'.$tag.'</a> | ';
+ 			$tag_link = add_query_arg( 'tag', $tag, '?page='.$_GET['page'] );
+			$action_tags[] = '<a href="'.$tag_link.'">'.$tag.'</a>';
 			}
-		echo '</p>';
+		echo implode ( ' | ', $action_tags ).'</p>';
 	endif;
 theme_update_available($ct);
 
@@ -322,8 +324,11 @@ foreach ($theme_names as $theme_name) {
 
 
 echo '<tr class="' . $alt . '">';
+if( DS_THEMES_SHOW_SCREENSHOT_THUMB == 'TRUE' ) {
+	echo '<td><a class="' . $thickbox_class . '" href="' . $preview_link .'" title="' . $preview_text . '" ' . $mouseover . '>"' . $title .'"<br /><img src="' . $theme_root_uri . '/' . $stylesheet . '/' . $screenshot.'" height="60" class="alignleft" /></a></td>';
+} else {
 echo '<td><a class="' . $thickbox_class . '" href="' . $preview_link .'" title="' . $preview_text . '" ' . $mouseover . '>"' . $title .'"</a></td>';
-
+}
 ?>
 <td><?php echo "$description"; ?>
 	<?php if ( current_user_can( 'edit_themes' ) && $parent_theme ) {
@@ -333,14 +338,15 @@ echo '<td><a class="' . $thickbox_class . '" href="' . $preview_link .'" title="
 	<p><?php printf(__( 'All of this theme&#8217;s files are located in <code>%2$s</code>.' ), $title, str_replace( WP_CONTENT_DIR, '', $template_dir ), str_replace( WP_CONTENT_DIR, '', $stylesheet_dir ) ); ?></p>
 <?php } 
 
-if ( $tags ) : 
-		echo '<p>'. __( 'Tags: | ' );  
+	
+	if ( $tags ) : 
+		echo '<p>'. __( 'Tags: ' );  
+			$action_tags = array();
  		foreach ($tags as $tag) {
- 			$uri = '?page='.$_GET['page'];
- 			$tag_link = add_query_arg( 'tag', $tag, $uri );
-			echo '<a href="'.$tag_link.'">'.$tag.'</a> | ';
+ 			$tag_link = add_query_arg( 'tag', $tag, '?page='.$_GET['page'] );
+			$action_tags[] = '<a href="'.$tag_link.'">'.$tag.'</a>';
 			}
-		echo '</p>';
+		echo implode ( ' | ', $action_tags ).'</p>';
 	endif;
 ?>
 </td>
