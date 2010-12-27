@@ -57,6 +57,8 @@ define( 'DS_THEMES_SHOW_SCREENSHOT_THUMB', 'TRUE' );
 * Initial Release for WP3.x multisite
 
 == Upgrade Notice ==
+= 3.0.1.4 =
+* Tested up to WP 3.0.3
 
 = 3.0.1 =
 * WPMU2.9.2 version no longer supported.
