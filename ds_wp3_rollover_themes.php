@@ -4,7 +4,7 @@ Plugin Name: Rollover Themes
 Plugin URI: http://dsader.snowotherway.org
 Description: Replaces default Appearance->Themes page. Themes list 100 themes per page, but only one screenshot until mouse rollover preview. 
 Author: David Sader
-Version: 3.0.1.2
+Version: 3.0.1.4
 Author URI: http://dsader.snowotherway.org
 
 This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@ GNU General Public License for more details.
 */ 
 
 // TODO make Network Options
-define( 'DS_THEMES_PER_PAGE','100' ); 
+define( 'DS_THEMES_PER_PAGE','10' ); 
 define( 'DS_THEMES_DISABLE_ORIGINAL_MENU', 'TRUE' );
 define( 'DS_THEMES_SHOW_SCREENSHOT_THUMB', 'TRUE' );
 //define( 'WP_DEFAULT_THEME', 'aeros' );
@@ -28,7 +28,6 @@ define( 'DS_THEMES_SHOW_SCREENSHOT_THUMB', 'TRUE' );
 //---Hooks----------------------------------------------------------------//
 //------------------------------------------------------------------------//
 add_action( 'admin_menu', 'ds_rollover_themes' );
-add_action( '_admin_menu', 'ds_unset_themes_submenu' );
 if( strpos($_SERVER['REQUEST_URI'], 'themes_table' ) ) {
 	add_action( 'admin_init', 'ds_themes_update' );
 	add_action( 'admin_enqueue_scripts', 'ds_replace_theme_context_help' );
@@ -58,11 +57,14 @@ add_contextual_help($current_screen, $help);
 endif;
 }
 
+if( DS_THEMES_DISABLE_ORIGINAL_MENU == 'TRUE' ) {
+	add_action( '_admin_menu', 'ds_unset_themes_submenu' );
+	add_action( 'admin_head', 'ds_unset_themes_icon_css' );
 
 function ds_unset_themes_submenu() {
 	global $submenu;
 	//unset the existing themes.php menu
-	if( current_user_can( 'switch_themes' ) && DS_THEMES_DISABLE_ORIGINAL_MENU == 'TRUE' ) { 
+	if( current_user_can( 'switch_themes' ) ) { 
 		if(!empty( $submenu['themes.php'] ) ) {
 		foreach( $submenu['themes.php'] as $key => $sm) {
 			if( __($sm[0]) == "Themes" || $sm[2] == "themes.php" ) {
@@ -76,6 +78,10 @@ function ds_unset_themes_submenu() {
 	}
 }
 
+function ds_unset_themes_icon_css() {
+	echo "<style type=\"text/css\">#icon-widgets{background:transparent url(". admin_url() . "images/icons32.png) no-repeat -11px -5px;}</style>";
+}
+}
 function ds_rollover_themes() {
 
 	$page = add_theme_page( 'Themes', 'Themes', 'switch_themes', 'themes_table', 'ds_themes' );
@@ -90,9 +96,7 @@ if ( current_user_can( 'switch_themes' ) && isset($_GET['action']) ) {
 	if ( 'activate' == $_GET['action']) {
 		check_admin_referer( 'switch-theme_' . $_GET['template']);
 		switch_theme($_GET['template'], $_GET['stylesheet']);
-//		wp_redirect( 'themes.php?activated=true' ); http://trac.wordpress.org/ticket/2860 http://wordpress.org/support/topic/179091?replies=1
 		$location = add_query_arg( 'activated', 'true', wp_get_referer() );
-//        echo "<meta http-equiv='refresh' content='0;url=$location' />";
 		wp_redirect($location);
 		exit;
 	} else if ( 'delete' == $_GET['action'] ) {
@@ -100,9 +104,7 @@ if ( current_user_can( 'switch_themes' ) && isset($_GET['action']) ) {
 		if ( !current_user_can( 'delete_themes' ) )
 			wp_die( __( 'Cheatin&#8217; uh?' ) );
 		delete_theme($_GET['template']);
-//		wp_redirect( 'themes.php?deleted=true' );
 		$location = add_query_arg( 'deleted', 'true', wp_get_referer() );
-//        echo "<meta http-equiv='refresh' content='0;url=$location' />";
 		wp_redirect($location);
 		exit;
 	}
@@ -110,27 +112,35 @@ if ( current_user_can( 'switch_themes' ) && isset($_GET['action']) ) {
 
 }
 function ds_themes() {
-
-$themes = get_allowed_themes();
-$ct = current_theme_info();
-
-
+if ( !current_user_can('switch_themes') && !current_user_can('edit_theme_options') )
+	wp_die( __( 'Cheatin&#8217; uh?' ) );
 
 $title = __( 'Manage Themes' );
-// $parent_file = 'themes.php';
+$parent_file = 'themes.php';
 
 
 require_once( './admin-header.php' );
-
-if ( is_multisite() && current_user_can( 'edit_themes' ) ) {
-	?><div id="message0" class="updated fade"><p><?php _e( 'Administrator: new themes must be activated in the <a href="wpmu-themes.php">Themes Admin</a> page before they appear here.' ); ?></p></div><?php
+if ( is_multisite() && current_user_can('edit_themes') ) {
+	?><div id="message0" class="updated"><p><?php printf( __('Administrator: new themes must be activated in the <a href="%s">Network Themes</a> screen before they appear here.'), admin_url( 'ms-themes.php') ); ?></p></div><?php
 }
 
- if ( ! validate_current_theme() ) : ?>
-<div id="message1" class="updated fade"><p><?php _e( 'The active theme is broken.  Reverting to the default theme.' ); ?></p></div>
-<?php elseif ( isset($_GET['activated']) ) : ?>
-<div id="message2" class="updated fade"><p><?php printf(__( 'New theme activated. <a href="%s">View site &raquo;</a>' ), get_bloginfo( 'url' ) . '/' ); ?></p></div>
+if ( ! validate_current_theme() ) : ?>
+<div id="message1" class="updated"><p><?php _e('The active theme is broken.  Reverting to the default theme.'); ?></p></div>
+<?php elseif ( isset($_GET['activated']) ) :
+		if ( isset($wp_registered_sidebars) && count( (array) $wp_registered_sidebars ) && current_user_can('edit_theme_options') ) { ?>
+<div id="message2" class="updated"><p><?php printf( __('New theme activated. This theme supports widgets, please visit the <a href="%s">widgets settings</a> screen to configure them.'), admin_url( 'widgets.php' ) ); ?></p></div><?php
+		} else { ?>
+<div id="message2" class="updated"><p><?php printf( __( 'New theme activated. <a href="%s">Visit site</a>' ), home_url( '/' ) ); ?></p></div><?php
+		}
+	elseif ( isset($_GET['deleted']) ) : ?>
+<div id="message3" class="updated"><p><?php _e('Theme deleted.') ?></p></div>
 <?php endif; 
+
+$themes = get_allowed_themes();
+$ct = current_theme_info();
+unset($themes[$ct->name]);
+
+
 $unfiltered_theme_total = count( $themes );
 if ($_POST['tag']) {
 	if($_POST['tag'] == 'all' ) {
@@ -162,7 +172,6 @@ if ($_GET['tag']) {
 		}
 
 }
-unset($themes[$ct->name]);
 
 uksort( $themes, "strnatcasecmp" );
 $theme_total = count( $themes );
@@ -177,7 +186,8 @@ if ( empty($page) )
 $start = $offset = ( $page - 1 ) * $per_page;
 
 $page_links = paginate_links( array(
-	'base' => add_query_arg( 'pagenum', '%#%' ) . '#themenav',
+
+	'base' => add_query_arg( array('pagenum' => '%#%', 'tag'=> $showbytag )) . '#themenav',
 	'format' => '',
 	'prev_text' => __( '&laquo;' ),
 	'next_text' => __( '&raquo;' ),
@@ -211,22 +221,24 @@ $themes = array_slice( $themes, $start, $per_page );
 ?>
 
 <div class="wrap">
+<?php screen_icon(); ?>
 <h2><a href="?page=themes_table" class="nav-tab nav-tab-active"><?php echo esc_html( $title ); ?></a><?php if ( current_user_can( 'install_themes' ) ) { ?><a href="theme-install.php" class="nav-tab"><?php echo esc_html_x( 'Install Themes', 'theme' ); ?></a><?php } ?></h2>
+
 <h3><?php _e( 'Current Theme' ); ?></h3>
 <div id="current-theme">
 <?php if ( $ct->screenshot ) : ?>
-
-<img src="<?php echo $ct->theme_root_uri . '/' . $ct->stylesheet . '/' . $ct->screenshot; ?>" />
+<img src="<?php echo $ct->theme_root_uri . '/' . $ct->stylesheet . '/' . $ct->screenshot; ?>" alt="<?php _e('Current theme preview'); ?>" />
 <?php endif; ?>
-<h4><?php printf(_c( '%1$s %2$s by %3$s|1: theme title, 2: theme version, 3: theme author' ), $ct->title, $ct->version, $ct->author) ; ?></h4>
-<p class="description"><?php echo $ct->description; ?></p>
-<?php if ( current_user_can( 'edit_themes' ) && $ct->parent_theme ) { ?>
-	<p><?php printf(__( 'The template files are located in <code>%2$s</code>. The stylesheet files are located in <code>%3$s</code>. <strong>%4$s</strong> uses templates from <strong>%5$s</strong>. Changes made to the templates will affect both themes.' ), $ct->title, str_replace( WP_CONTENT_DIR, '', $ct->template_dir ), str_replace( WP_CONTENT_DIR, '', $ct->stylesheet_dir ), $ct->title, $ct->parent_theme); ?></p>
+<h4><?php
+	/* translators: 1: theme title, 2: theme version, 3: theme author */
+	printf(__('%1$s %2$s by %3$s'), $ct->title, $ct->version, $ct->author) ; ?></h4>
+<p class="theme-description"><?php echo $ct->description; ?></p>
+<?php if ( current_user_can('edit_themes') && $ct->parent_theme ) { ?>
+	<p><?php printf(__('The template files are located in <code>%2$s</code>. The stylesheet files are located in <code>%3$s</code>. <strong>%4$s</strong> uses templates from <strong>%5$s</strong>. Changes made to the templates will affect both themes.'), $ct->title, str_replace( WP_CONTENT_DIR, '', $ct->template_dir ), str_replace( WP_CONTENT_DIR, '', $ct->stylesheet_dir ), $ct->title, $ct->parent_theme); ?></p>
 <?php } else { ?>
-	<p><?php printf(__( 'All of this theme&#8217;s files are located in <code>%2$s</code>.' ), $ct->title, str_replace( WP_CONTENT_DIR, '', $ct->template_dir ), str_replace( WP_CONTENT_DIR, '', $ct->stylesheet_dir ) ); ?></p>
+	<p><?php printf(__('All of this theme&#8217;s files are located in <code>%2$s</code>.'), $ct->title, str_replace( WP_CONTENT_DIR, '', $ct->template_dir ), str_replace( WP_CONTENT_DIR, '', $ct->stylesheet_dir ) ); ?></p>
 <?php } ?>
-<?php 
-	if ( $ct->tags ) : 
+<?php if ( $ct->tags ) : 
 		echo '<p>'. __( 'Tags: ' ); 
 			$action_tags = array(); 
  		foreach ($ct->tags as $tag) {
@@ -235,12 +247,18 @@ $themes = array_slice( $themes, $start, $per_page );
 			}
 		echo implode ( ' | ', $action_tags ).'</p>';
 	endif;
-theme_update_available($ct);
+theme_update_available($ct); ?>
 
-?>
 </div>
 
-<br style="clear: both" />
+<div class="clear"></div>
+<?php
+if ( ! current_user_can( 'switch_themes' ) ) {
+	echo '</div>';
+//	require( './admin-footer.php' );
+	exit;
+}
+?>
 <form method="POST" action="?page=themes_table">
 <h2><?php echo $theme_total.' Available Themes'; ?></h2>
 <div class="tablenav">
@@ -285,7 +303,7 @@ if ( is_multisite() && current_user_can( 'edit_themes' ) ) {
 		<th>Action</th>
 	</tr>
 	</thead>
-		<tbody id='the-list-x' width='auto'>
+			<tbody id="plugins">
 
 <?php
 foreach ($theme_names as $theme_name) {
@@ -330,7 +348,7 @@ if( DS_THEMES_SHOW_SCREENSHOT_THUMB == 'TRUE' ) {
 echo '<td><a class="' . $thickbox_class . '" href="' . $preview_link .'" title="' . $preview_text . '" ' . $mouseover . '>"' . $title .'"</a></td>';
 }
 ?>
-<td><?php echo "$description"; ?>
+<td><p class="description"><?php echo $description; ?></p>
 	<?php if ( current_user_can( 'edit_themes' ) && $parent_theme ) {
 	/* translators: 1: theme title, 2:  template dir, 3: stylesheet_dir, 4: theme title, 5: parent_theme */ ?>
 	<p><?php printf(__( 'The template files are located in <code>%2$s</code>. The stylesheet files are located in <code>%3$s</code>. <strong>%4$s</strong> uses templates from <strong>%5$s</strong>. Changes made to the templates will affect both themes.' ), $title, str_replace( WP_CONTENT_DIR, '', $template_dir ), str_replace( WP_CONTENT_DIR, '', $stylesheet_dir ), $title, $parent_theme); ?></p>
