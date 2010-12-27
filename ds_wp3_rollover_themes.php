@@ -20,7 +20,7 @@ GNU General Public License for more details.
 */ 
 
 // TODO make Network Options
-define( 'DS_THEMES_PER_PAGE','10' ); 
+define( 'DS_THEMES_PER_PAGE','100' ); 
 define( 'DS_THEMES_DISABLE_ORIGINAL_MENU', 'TRUE' );
 define( 'DS_THEMES_SHOW_SCREENSHOT_THUMB', 'TRUE' );
 //define( 'WP_DEFAULT_THEME', 'aeros' );
