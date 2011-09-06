@@ -2,8 +2,8 @@
 Contributors: dsader
 Donate link: http://dsader.snowotherway.org
 Tags: multisite, network, themes, themes table, themes list, rollover themes, rollover themes list, replace themes page, theme tags, set default theme
-Requires at least: 3.0
-Tested up to: 3.0.3
+Requires at least: 3.2.1
+Tested up to: 3.2.1
 Stable tag: Trunk
 
 An "mu-plugin" to replaces default Appearance->Themes page. Themes list 100 themes per page, but only one screenshot until mouse rollover preview.
@@ -44,6 +44,10 @@ define( 'DS_THEMES_SHOW_SCREENSHOT_THUMB', 'TRUE' );
 * The original mouseover screenshot code and table view comes from the Userthemes Revisted plugin.  I am no longer actively developing Userthemes Revisted.
 
 == Changelog ==
+= 3.0.1.6 =
+
+* Tested up to: WP 3.2.1
+
 = 3.0.1.4 =
 
 * Added Appearance screen_icons, bugfix pagination navigation

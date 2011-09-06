@@ -4,7 +4,7 @@ Plugin Name: Rollover Themes
 Plugin URI: http://dsader.snowotherway.org
 Description: Replaces default Appearance->Themes page. Themes list 100 themes per page, but only one screenshot until mouse rollover preview. 
 Author: David Sader
-Version: 3.0.1.4
+Version: 3.0.1.6
 Author URI: http://dsader.snowotherway.org
 
 This program is free software; you can redistribute it and/or modify
@@ -17,6 +17,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
+Style nudges and tested for WP 3.1.3 compat
 */ 
 
 // TODO make Network Options
@@ -142,7 +143,7 @@ unset($themes[$ct->name]);
 
 
 $unfiltered_theme_total = count( $themes );
-if ($_POST['tag']) {
+if (isset($_POST['tag'])) {
 	if($_POST['tag'] == 'all' ) {
 		$themes = $themes;
 		} else {
@@ -157,7 +158,7 @@ if ($_POST['tag']) {
 		}
 
 }
-if ($_GET['tag']) {
+if (isset($_GET['tag'])) {
 	if($_GET['tag'] == 'all' ) {
 		$themes = $themes;
 		} else {
@@ -185,9 +186,14 @@ if ( empty($page) )
 
 $start = $offset = ( $page - 1 ) * $per_page;
 
+	if(isset($showbytag)) {
+		$showbytag_arg = array('tag'=> $showbytag );
+	} else {
+		$showbytag_arg = '';
+	}
+	
 $page_links = paginate_links( array(
-
-	'base' => add_query_arg( array('pagenum' => '%#%', 'tag'=> $showbytag )) . '#themenav',
+	'base' => add_query_arg( array('pagenum' => '%#%', $showbytag_arg )) . '#themenav',
 	'format' => '',
 	'prev_text' => __( '&laquo;' ),
 	'next_text' => __( '&raquo;' ),
@@ -197,19 +203,21 @@ $page_links = paginate_links( array(
 $altags = array();
 foreach ($themes as $t){
 	foreach ($t['Tags'] as $id =>$tag) {
-		$altags[$tag]=(int)$altags[$tag]+1;
-	}
+		if (!isset($altags)) 
+			{	
+				$altags[$tag]=(int)$altags[$tag]+1;
+			}
+		}
 }
 arsort($altags);
-				if ($_POST['tag']) {
+				if(isset($_POST['tag'])) {
 					$selected = $_POST['tag'];
-				} elseif($_GET['tag']) {
+				} elseif(isset($_GET['tag'])) {
 					$selected = $_GET['tag'];
-				}
-				
+				} 
 				$tag_filter = '';
 				foreach ( $altags as $name => $count ) {
-					if ( $selected == $name) {
+					if( $selected == $name) {
 					$tag_filter = '<option selected="selected" value="'.$name.'">'.$name.' ('.$count.')</option>';
 					} else {
 					$tag_filter .= '<option value="'.$name.'">'.$name.' ('.$count.')</option>';
@@ -306,6 +314,7 @@ if ( is_multisite() && current_user_can( 'edit_themes' ) ) {
 			<tbody id="plugins">
 
 <?php
+$alt = '';
 foreach ($theme_names as $theme_name) {
 	$template = $themes[$theme_name]['Template'];
 	$stylesheet = $themes[$theme_name]['Stylesheet'];
@@ -338,8 +347,9 @@ foreach ($theme_names as $theme_name) {
 
 	$actions = implode ( '&nbsp;|&nbsp;', $actions );
 
-	$alt = $alt == '' ? 'alternate' : '';
-
+$alt = ( 'alternate' == $alt ) ? '' : 'alternate';
+			//$alt = $alt == '' ? 'alternate' : '';
+	
 
 echo '<tr class="' . $alt . '">';
 if( DS_THEMES_SHOW_SCREENSHOT_THUMB == 'TRUE' ) {
