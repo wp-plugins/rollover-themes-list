@@ -203,7 +203,7 @@ $page_links = paginate_links( array(
 $altags = array();
 foreach ($themes as $t){
 	foreach ($t['Tags'] as $id =>$tag) {
-		if (!isset($altags)) 
+		if (isset($altags)) 
 			{	
 				$altags[$tag]=(int)$altags[$tag]+1;
 			}
