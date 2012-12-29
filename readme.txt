@@ -5,6 +5,8 @@ Tags: multisite, network, themes, themes table, themes list, rollover themes, ro
 Requires at least: 3.2.1
 Tested up to: 3.2.1
 Stable tag: Trunk
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 An "mu-plugin" to replaces default Appearance->Themes page. Themes list 100 themes per page, but only one screenshot until mouse rollover preview.
 
